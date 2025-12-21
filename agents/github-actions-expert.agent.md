@@ -69,8 +69,8 @@ jobs:
       packages: write  # Only for package publishing
     
     steps:
-      # 3. Pin actions to full commit SHA
-      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11  # v4.1.1
+      # 3. Pin actions to specific versions
+      - uses: actions/checkout@v4
       
       # 4. Never expose secrets in logs
       - name: Deploy
@@ -81,20 +81,20 @@ jobs:
 
 ### **Action Pinning Strategy**
 
-**CRITICAL: Always pin to full commit SHA for supply-chain security**
+**Pin actions to specific versions for stability and security**
 
 ```yaml
-# ❌ BAD: Mutable references (can be changed to malicious code)
+# ❌ BAD: Mutable references
 - uses: actions/checkout@main
-- uses: actions/checkout@v4
-- uses: actions/setup-node@latest
+- uses: actions/checkout@latest
 
-# ✅ BEST: Immutable full-length commit SHA
+# ✅ GOOD: Major version tag (balance of security and maintenance)
+- uses: actions/checkout@v4
+- uses: actions/setup-node@v4
+
+# ✅ BEST: Full commit SHA (maximum security, requires more maintenance)
 - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11  # v4.1.1
 - uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8  # v4.0.2
-
-# ✅ ACCEPTABLE: Major version tag (easier maintenance, less secure)
-- uses: actions/checkout@v4
 ```
 
 **Automate Action Updates with Dependabot:**
@@ -128,7 +128,7 @@ jobs:
     runs-on: ubuntu-latest
     # Inherits contents: read
     steps:
-      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11
+      - uses: actions/checkout@v4
       - run: npm run lint
   
   publish:
@@ -139,7 +139,7 @@ jobs:
       contents: read
       packages: write
     steps:
-      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11
+      - uses: actions/checkout@v4
       - run: npm publish
 ```
 
@@ -200,10 +200,10 @@ jobs:
       contents: read
     
     steps:
-      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11
+      - uses: actions/checkout@v4
       
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@e3dd6a429d7300a6a4c196c26e071d42e0343502  # v4.0.2
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: arn:aws:iam::123456789012:role/GitHubActionsRole
           aws-region: us-east-1
@@ -247,10 +247,10 @@ jobs:
       contents: read
     
     steps:
-      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11
+      - uses: actions/checkout@v4
       
       - name: Azure Login
-        uses: azure/login@de95379fe4dadc2489801db2c52400e61a3333e3  # v2.0.0
+        uses: azure/login@v2
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
@@ -271,10 +271,10 @@ jobs:
       contents: read
     
     steps:
-      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11
+      - uses: actions/checkout@v4
       
       - name: Authenticate to Google Cloud
-        uses: google-github-actions/auth@55bd3a7c6e2ae7cf1877fd1ccb9d54c0503c457c  # v2.1.2
+        uses: google-github-actions/auth@v2
         with:
           workload_identity_provider: 'projects/123456789/locations/global/workloadIdentityPools/github-pool/providers/github-provider'
           service_account: 'github-actions@my-project.iam.gserviceaccount.com'
@@ -341,10 +341,10 @@ jobs:
   dependency-review:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11
+      - uses: actions/checkout@v4
       
       - name: Dependency Review
-        uses: actions/dependency-review-action@5bbc3ba658137598168acb2ab73b21c432dd411b  # v4.2.5
+        uses: actions/dependency-review-action@v4
         with:
           fail-on-severity: moderate
           deny-licenses: GPL-2.0, GPL-3.0
@@ -377,19 +377,19 @@ jobs:
         language: [javascript, python, java]
     
     steps:
-      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11
+      - uses: actions/checkout@v4
       
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@1b1aada464948af03b950897e5eb522f92603cc2  # v3.24.9
+        uses: github/codeql-action/init@v3
         with:
           languages: ${{ matrix.language }}
           queries: security-extended
       
       - name: Autobuild
-        uses: github/codeql-action/autobuild@1b1aada464948af03b950897e5eb522f92603cc2
+        uses: github/codeql-action/autobuild@v3
       
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@1b1aada464948af03b950897e5eb522f92603cc2
+        uses: github/codeql-action/analyze@v3
         with:
           category: "/language:${{ matrix.language }}"
 ```
@@ -401,7 +401,7 @@ jobs:
   run: docker build -t myapp:${{ github.sha }} .
 
 - name: Scan with Trivy
-  uses: aquasecurity/trivy-action@7c2007bcb556501da015201bcba5aa14069b74e2  # 0.20.0
+  uses: aquasecurity/trivy-action@v0
   with:
     image-ref: myapp:${{ github.sha }}
     format: 'sarif'
@@ -409,7 +409,7 @@ jobs:
     severity: 'CRITICAL,HIGH'
 
 - name: Upload to GitHub Security
-  uses: github/codeql-action/upload-sarif@1b1aada464948af03b950897e5eb522f92603cc2
+  uses: github/codeql-action/upload-sarif@v3
   with:
     sarif_file: 'trivy-results.sarif'
 ```
@@ -418,21 +418,21 @@ jobs:
 
 ```yaml
 - name: Generate SBOM
-  uses: anchore/sbom-action@7ccf588e3cf3cc2611714c2eeae48550fbc17552  # v0.15.11
+  uses: anchore/sbom-action@v0
   with:
     image: myapp:${{ github.sha }}
     format: spdx-json
     output-file: sbom.spdx.json
 
 - name: Upload SBOM
-  uses: actions/upload-artifact@5d5d22a31266ced268874388b861e4b58bb5c2f3  # v4.3.1
+  uses: actions/upload-artifact@v4
   with:
     name: sbom
     path: sbom.spdx.json
     retention-days: 90
 
 - name: Sign with Cosign
-  uses: sigstore/cosign-installer@e1523de7571e31dbe865fd2e80c5c7c23ae71eb4  # v3.4.0
+  uses: sigstore/cosign-installer@v3
 
 - name: Sign Image
   env:
@@ -499,7 +499,7 @@ concurrency:
 
 ```yaml
 - name: Setup Node.js
-  uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8  # v4.0.2
+  uses: actions/setup-node@v4
   with:
     node-version: '20'
     cache: 'npm'  # Built-in dependency caching
@@ -511,7 +511,7 @@ concurrency:
 
 ```yaml
 - name: Cache Dependencies
-  uses: actions/cache@ab5e6d0c87105b4c9c2047343972218f562e4319  # v4.0.1
+  uses: actions/cache@v4
   with:
     path: |
       ~/.npm
@@ -526,10 +526,10 @@ concurrency:
 
 ```yaml
 - name: Set up Docker Buildx
-  uses: docker/setup-buildx-action@2b51285047da1547ffb1b2203d8be4c0af6b1f20  # v3.2.0
+  uses: docker/setup-buildx-action@v3
 
 - name: Build and Push
-  uses: docker/build-push-action@2cdde995de11925a030ce8070c3d77a52ffcf1c0  # v5.3.0
+  uses: docker/build-push-action@v5
   with:
     context: .
     push: true
@@ -557,10 +557,10 @@ jobs:
   actionlint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11
+      - uses: actions/checkout@v4
       
       - name: Run actionlint
-        uses: reviewdog/action-actionlint@4f8f9963ca57a41e5fd5b538dd79dbfbd3e0b38a  # v1.54.0
+        uses: reviewdog/action-actionlint@v1
         with:
           actionlint_flags: -color
 ```
@@ -608,29 +608,29 @@ jobs:
       contents: read
       security-events: write
     steps:
-      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11
+      - uses: actions/checkout@v4
       
       - name: Dependency Review
         if: github.event_name == 'pull_request'
-        uses: actions/dependency-review-action@5bbc3ba658137598168acb2ab73b21c432dd411b
+        uses: actions/dependency-review-action@v4
         with:
           fail-on-severity: high
       
       - name: Run CodeQL
-        uses: github/codeql-action/init@1b1aada464948af03b950897e5eb522f92603cc2
+        uses: github/codeql-action/init@v3
         with:
           languages: javascript
       
-      - uses: github/codeql-action/autobuild@1b1aada464948af03b950897e5eb522f92603cc2
+      - uses: github/codeql-action/autobuild@v3
       
-      - uses: github/codeql-action/analyze@1b1aada464948af03b950897e5eb522f92603cc2
+      - uses: github/codeql-action/analyze@v3
   
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11
+      - uses: actions/checkout@v4
       
-      - uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8
+      - uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
@@ -639,7 +639,7 @@ jobs:
       - run: npm test
       
       - name: Upload Coverage
-        uses: codecov/codecov-action@c16abc29c95fcf9174b58eb7e1abf4c866893bc8  # v4.1.1
+        uses: codecov/codecov-action@v4
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
   
@@ -647,9 +647,9 @@ jobs:
     needs: [security-scan, test]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11
+      - uses: actions/checkout@v4
       
-      - uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8
+      - uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
@@ -658,7 +658,7 @@ jobs:
       - run: npm run build
       
       - name: Upload Build Artifact
-        uses: actions/upload-artifact@5d5d22a31266ced268874388b861e4b58bb5c2f3
+        uses: actions/upload-artifact@v4
         with:
           name: dist
           path: dist/
@@ -673,15 +673,15 @@ jobs:
       contents: read
       id-token: write
     steps:
-      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11
+      - uses: actions/checkout@v4
       
-      - uses: actions/download-artifact@c850b930e6ba138125429b7e5c93fc707a7f8427  # v4.1.4
+      - uses: actions/download-artifact@v4
         with:
           name: dist
           path: dist/
       
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@e3dd6a429d7300a6a4c196c26e071d42e0343502
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: us-east-1
@@ -700,15 +700,15 @@ jobs:
       contents: read
       id-token: write
     steps:
-      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11
+      - uses: actions/checkout@v4
       
-      - uses: actions/download-artifact@c850b930e6ba138125429b7e5c93fc707a7f8427
+      - uses: actions/download-artifact@v4
         with:
           name: dist
           path: dist/
       
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@e3dd6a429d7300a6a4c196c26e071d42e0343502
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.AWS_PROD_ROLE_ARN }}
           aws-region: us-east-1
@@ -794,7 +794,7 @@ on:
 ```yaml
 # Debug cache behavior
 - name: Cache Debug
-  uses: actions/cache@ab5e6d0c87105b4c9c2047343972218f562e4319
+  uses: actions/cache@v4
   with:
     path: ~/.npm
     key: debug-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}

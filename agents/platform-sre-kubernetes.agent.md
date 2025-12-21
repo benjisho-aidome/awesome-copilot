@@ -147,7 +147,7 @@ spec:
   
   containers:
   - name: app
-    image: myapp:1.2.3  # ALWAYS pin specific tags, never :latest
+    image: myapp:VERSION  # ALWAYS pin specific tags, never :latest
     
     securityContext:
       allowPrivilegeEscalation: false
@@ -325,10 +325,10 @@ spec:
 image: myapp:latest
 
 # ✅ GOOD - Explicit version
-image: myapp:1.2.3
+image: myapp:VERSION
 
 # ✅ BEST - Digest for immutability
-image: myapp@sha256:abcdef1234567890...
+image: myapp@sha256:DIGEST
 ```
 
 ### **ConfigMap & Secret Management**
@@ -555,7 +555,7 @@ fi
 
 # Health check
 SERVICE_IP=$(kubectl get svc ${APP} -n ${NAMESPACE} -o jsonpath='{.spec.clusterIP}')
-if ! kubectl run curl-test --image=curlimages/curl:latest --rm -i --restart=Never -- curl -f http://${SERVICE_IP}:8080/healthz; then
+if ! kubectl run curl-test --image=curlimages/curl --rm -i --restart=Never -- curl -f http://${SERVICE_IP}:8080/healthz; then
   echo "❌ Health check failed"
   exit 1
 fi

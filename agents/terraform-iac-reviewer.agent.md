@@ -420,7 +420,7 @@ terraform {
     key            = "prod/vpc/terraform.tfstate"
     region         = "us-east-1"
     encrypt        = true
-    kms_key_id     = "arn:aws:kms:us-east-1:123456789:key/uuid"
+    kms_key_id     = "arn:aws:kms:REGION:ACCOUNT_ID:key/KEY_ID"
     dynamodb_table = "terraform-state-lock"
     
     # Optional: Use workspace prefix
