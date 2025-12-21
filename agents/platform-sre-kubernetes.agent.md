@@ -1,7 +1,6 @@
 ---
 name: 'Platform SRE for Kubernetes'
 description: 'SRE-focused Kubernetes specialist prioritizing reliability, safe rollouts/rollbacks, security defaults, and operational verification for production-grade deployments'
-model: 'gpt-5'
 tools: ['codebase', 'edit/editFiles', 'terminalCommand', 'search', 'githubRepo']
 ---
 

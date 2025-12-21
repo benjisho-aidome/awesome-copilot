@@ -1,7 +1,6 @@
 ---
 agent: 'agent'
 description: 'Generate comprehensive rollout plans with preflight checks, step-by-step deployment, verification signals, rollback procedures, and communication plans for infrastructure and application changes'
-model: 'gpt-5'
 tools: ['codebase', 'terminalCommand', 'search', 'githubRepo']
 ---
 
